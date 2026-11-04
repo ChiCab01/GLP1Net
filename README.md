@@ -1,0 +1,5 @@
+# <img width="50" height="50" alt="Diapositiva3" src="https://github.com/user-attachments/assets/ae5179c1-ac43-43d8-8f8b-5e38610c6b08" /> GLP1 role in neurodegenerative diseases
+
+The role of the GLP-1 pathway in neurodegenerative diseases is currently being studied extensively. The aim of this project was the reconstruction of its signaling pathway in neuronal cells of individuals affected by AD and PD, together with the development of a simple ODE model as a foundation for future developments. 
+
+The pathway was reconstructed using Cytoscape by consulting articles in the literature and KEGG. Two files were produced: one containing metabolites and their cellular compartment locations; the other containing reactions, kinetic constants, and the types of reactions included. These datasets were imported and cleaned via Python using the COBRA environment, with the aim of creating a standard SBML format file. This was employed to set up an ODE model regarding three molecular targets: GLP-1, cAMP, and PKA.

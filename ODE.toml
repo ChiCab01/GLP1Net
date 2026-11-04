@@ -1,0 +1,115 @@
+##############################################################################
+########################### GENERAL INFORMATION ##############################
+##############################################################################
+
+[metadata]
+
+authors = "Chiara Cabrini, Andrea Trasatti"
+data_creation = "2025-08-03"
+model_id = "signaling_demo"
+description = "Sim ODE pathways: GLP1→PKA, Adenosina/Dopamina→PKA"
+
+
+[paths]
+PATH_REACTIONS_XLSX = "REACTIONS_disease2.xlsx"
+PATH_REACTIONS_CONTROL_XLSX = "REACTIONS_clean3.xlsx"
+
+
+##############################################################################
+######################## PARAMETERS FOR SIMULATION ###########################
+##############################################################################
+
+##################################
+# ODE.toml — via GLP1 + Dopamine #
+##################################
+
+[simulation]
+t0    = 0.0
+t_end = 400.0
+n_eval = 400
+rtol  = 1e-6
+atol  = 1e-9
+
+[units]
+time = "s"
+concentration = "µM"
+
+#######################################################
+# How to read columns of the dataframe imported.
+
+[column_map]
+reaction_id   = "reaction_id"
+reaction_type = "reaction_type"
+sources       = "source_modified"
+targets       = "target_modified"
+km            = "km_um"
+kd            = "kd_um"
+kcat          = "kcat_s"
+
+
+#######################################################
+# Kinetic defaults (when the dataframe imported has no 
+# values).
+
+[kinetics.defaults]
+Km_uM    = 1.0
+Kd_uM    = 0.5
+kcat_s   = 0.2
+fin_uM_s = 0.10   # afflusso per 'feed'
+kout_s   = 0.005  # deflusso per 'sink'
+
+
+#######################################################
+# Map to associate each type of reactions to its kinetic 
+# law.
+
+[kinetics.rate_law_by_type]
+feed       = "const_in"        # v = fin
+sink       = "first_order_out" # v = kout * [source]
+activation = "mm"              # v = kcat * S/(Km+S)
+inhibition = "mm"              # stoichiometry leads the net effect.
+
+
+#######################################################
+# Which pathway to simulate.
+[pathway]
+mode = "filter_by_metabolites"
+
+start = ["glp1", "insulin"]  
+# sources, names have to be the same of the dataframe. 
+
+# Destinazioni finali
+end = ["pka"]       
+# targets, names have to be the same of the dataframe;
+# change the id if the one you need is different  
+# (eg. pka_a, ampa_receptor)
+
+
+include_feed = true
+include_sink = true
+# Also sink and feed reactions are included.
+
+
+
+#######################################################
+# Initial condition.
+[initial_conditions]
+glp1      = 20.0   # present ligand.
+insulin   = 20.0   # intial excess.
+pka       = 0.0
+camp      = 0.0
+ampar     = 0.0
+
+
+
+#######################################################
+# Plot of concentrations over time.
+[plot]
+species_to_plot = ["glp1", "camp", "pka", "insulin"]
+yscale = "linear"
+
+[plot.colors]
+glp1  = "blue"
+camp  = "gray"
+pka   = "purple"
+insulin = "red"

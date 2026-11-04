@@ -1,0 +1,568 @@
+##############################################################################
+########################### GENERAL INFORMATION ##############################
+##############################################################################
+
+[metadata]
+
+authors = "Chiara Cabrini, Andrea Trasatti"
+data_creation = "2025-08-03"
+description = "Effect og GLP-1 hormone in neurodegenerative diseases"
+model_id = "GLP1_model"
+model_name = "Modelling the effect of GLP-1 in a neuronal cell"
+
+
+[paths]
+MET_CSV_PATH = "METABOLITES.csv"
+REACTIONS_CSV_PATH = "REACTIONS.csv"
+REACTIONS_XLSX_PATH_prepare = "REACTIONS_prepare1.xlsx"
+REACTIONS_XLSX_PATH_disease = "REACTIONS_disease2.xlsx"
+METABOLITE_XLSX_PATH = "METABOLITES_clean.xlsx"
+REACTIONS_XLSX_PATH = "REACTIONS_clean3.xlsx"
+
+
+##############################################################################
+################## CREATION OF THE CORRECT METABOLITES IDS ###################
+##############################################################################
+
+# Metabolites are sometimes written with greek letters.
+# To standardize IDs, all greek letters will be converted to their spelled-out form.
+
+[GREEK_LETTERS]
+"α" = "alpha"
+"β" = "beta"
+"γ" = "gamma"
+"δ" = "delta"
+"ε" = "epsilon"
+"ζ" = "zeta"
+"η" = "eta"
+"θ" = "theta"
+"ι" = "iota"
+"κ" = "kappa"
+"λ" = "lambda"
+"μ" = "mu"
+"ν" = "nu"
+"ξ" = "xi"
+"ο" = "omicron"
+"π" = "pi"
+"ρ" = "rho"
+"σ" = "sigma"
+"τ" = "tau"
+"υ" = "upsilon"
+"φ" = "phi"
+"χ" = "chi"
+"ψ" = "psi"
+"ω" = "omega"
+
+
+
+
+
+
+
+
+
+##############################################################################
+############## BOUNDS AND REACTIONS BASED ON REACTION TYPE ###################
+##############################################################################
+
+#######################################################
+# lower and upper bound as generical defaults.
+
+[defaults]
+lower_bound = 0
+upper_bound = 1000
+bound_override = "auto"  # Options: "auto", "preserve", "force"
+
+
+#######################################################
+# lower and upper bound specific for each reaction type.
+
+[DEFAULT_TYPE_BOUNDS] 
+phosphorylation = { bounds = [0, 1000], reversible = false }
+inhibition = { bounds = [0, 1000], reversible = false }
+
+
+
+
+##############################################################################
+#################### RULES TO WRITE THE REACTION STRING ######################
+##############################################################################
+
+
+#######################################################
+[REACTION_PATTERNS."trasduction_phosphorylation".sources]
+"{source}" = -1
+"{target}" = -1
+
+[REACTION_PATTERNS."trasduction_phosphorylation".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."trasduction_phosphorylation".targets]
+"{target}_p" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."translational_regulation".sources]
+"{source}_p" = -1
+
+[REACTION_PATTERNS."translational_regulation".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."translational_regulation".targets]
+"{target}" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."transcriptional_coactivation".sources]
+"{source}" = -1
+
+[REACTION_PATTERNS."transcriptional_coactivation".symbols]
+symbol = "--[{catalyst}]-->" 
+
+[REACTION_PATTERNS."transcriptional_coactivation".targets]
+"{target}" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."transcriptional_activation".sources]
+"{source}_a" = -1
+
+[REACTION_PATTERNS."transcriptional_activation".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."transcriptional_activation".targets]
+"{target}" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."splicing".sources]
+"{source}_unspliced" = -1
+
+[REACTION_PATTERNS."splicing".symbols]
+symbol = "--[{catalyst}]-->" 
+
+[REACTION_PATTERNS."splicing".targets]
+"{target}_spliced" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."release".sources]
+"{source}" = -1
+
+[REACTION_PATTERNS."release".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."release".targets]
+"{target}" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."recruitment a /".sources]
+"{source}_a" = -1
+
+[REACTION_PATTERNS."recruitment a /".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."recruitment a /".targets]
+"{target}" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."recruitment / a".sources]
+"{source}" = -1
+
+[REACTION_PATTERNS."recruitment / a".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."recruitment / a".targets]
+"{target}_a" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."production a /".sources]
+"{source}_a" = -1
+
+[REACTION_PATTERNS."production a /".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."production a /".targets]
+"{target}" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."phosphorylation".sources]
+"{source} + atp" = -1
+
+[REACTION_PATTERNS."phosphorylation".symbols]
+symbol = "--[{catalyst}]-->" 
+
+[REACTION_PATTERNS."phosphorylation".targets]
+"{target} + adp" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."negative feedback".sources]
+"{source}_a" = -1
+
+[REACTION_PATTERNS."negative feedback".symbols]
+symbol = "--|" 
+
+[REACTION_PATTERNS."negative feedback".targets]
+"{target}" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."ionic influx activation".sources]
+"{source}" = -1
+
+[REACTION_PATTERNS."ionic influx activation".symbols]
+symbol = "-- {catalyst} -->" 
+
+[REACTION_PATTERNS."ionic influx activation".targets]
+"{target}" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."inhibition a /".sources]
+"{source}_a" = -1
+
+[REACTION_PATTERNS."inhibition a /".symbols]
+symbol = "--|" 
+
+[REACTION_PATTERNS."inhibition a /".targets]
+"{target}" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."inhibition".sources]
+"{source}" = -1
+
+[REACTION_PATTERNS."inhibition".symbols]
+symbol = "--|" 
+
+[REACTION_PATTERNS."inhibition".targets]
+"{target}" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."indirect activation a a".sources]
+"{source}_a" = -1
+
+[REACTION_PATTERNS."indirect activation a a".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."indirect activation a a".targets]
+"{target}_a" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."indirect activation a /".sources]
+"{source}_a" = -1
+
+[REACTION_PATTERNS."indirect activation a /".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."indirect activation a /".targets]
+"{target}" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."indirect activation / a".sources]
+"{source}" = -1
+
+[REACTION_PATTERNS."indirect activation / a".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."indirect activation / a".targets]
+"{target}_a" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."indirect activation / /".sources]
+"{source}" = -1
+
+[REACTION_PATTERNS."indirect activation / /".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."indirect activation / /".targets]
+"{target}" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."income".sources]
+"{source}_a" = -1
+
+[REACTION_PATTERNS."income".symbols]
+symbol = "-- {catalyst} -->" 
+
+[REACTION_PATTERNS."income".targets]
+"{target}" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."degradation".sources]
+"{source}_a" = -1
+
+[REACTION_PATTERNS."degradation".symbols]
+symbol = "-- {catalyst} -->" 
+
+[REACTION_PATTERNS."degradation".targets]
+"{target}" = -1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."coactivation a a".sources]
+"{source}_a" = -1
+
+[REACTION_PATTERNS."coactivation a a".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."coactivation a a".targets]
+"{target}_a" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."coactivation a /".sources]
+"{source}_a" = -1
+
+[REACTION_PATTERNS."coactivation a /".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."coactivation a /".targets]
+"{target}" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."coactivation / a".sources]
+"{source}" = -1
+
+[REACTION_PATTERNS."coactivation / a".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."coactivation / a".targets]
+"{target}_a" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."cleavage".sources]
+"{source}_a" = -1
+
+[REACTION_PATTERNS."cleavage".symbols]
+symbol = "-- [{catalyst}] -->" 
+
+[REACTION_PATTERNS."cleavage".targets]
+"{target}_a" = +1
+
+
+
+#######################################################
+[REACTION_PATTERNS."cleavage a".sources]
+"{source}" = -1
+
+[REACTION_PATTERNS."cleavage a".symbols]
+symbol = "-- [{catalyst}] -->" 
+
+[REACTION_PATTERNS."cleavage a".targets]
+"{target}_a" = +1
+
+
+
+#######################################################
+[REACTION_PATTERNS."binding".sources]
+"{source}" = -1
+"{target}" = -1
+
+[REACTION_PATTERNS."binding".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."binding".targets]
+"complex_{source}_{target}" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."activation phosphorylation".sources]
+"{source}_p" = -1
+
+[REACTION_PATTERNS."activation phosphorylation".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."activation phosphorylation".targets]
+"{target}_p" = +1
+
+
+
+#######################################################
+[REACTION_PATTERNS."activation condition".sources]
+"{source}" = -1
+
+[REACTION_PATTERNS."activation condition".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."activation condition".targets]
+"{target}_a" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."activation a a".sources]
+"{source}_a" = -1
+
+[REACTION_PATTERNS."activation a a".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."activation a a".targets]
+"{target}_a" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."activation a /".sources]
+"{source}_a" = -1
+
+[REACTION_PATTERNS."activation a /".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."activation a /".targets]
+"{target}" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."activation / a".sources]
+"{source}" = -1
+
+[REACTION_PATTERNS."activation / a".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."activation / a".targets]
+"{target}_a" = +1
+
+
+
+#######################################################
+[REACTION_PATTERNS."aberrant coactivation".sources]
+"{source}" = -1
+
+[REACTION_PATTERNS."aberrant coactivation".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."aberrant coactivation".targets]
+"{target}" = +1
+
+
+
+#######################################################
+[REACTION_PATTERNS."aberrant creation".sources]
+"{source}" = -1
+
+[REACTION_PATTERNS."aberrant creation".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."aberrant creation".targets]
+"{target}" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."aberrant aggregation".sources]
+"{source}" = -1
+
+[REACTION_PATTERNS."aberrant aggregation".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."aberrant aggregation".targets]
+"{target}" = +1
+
+
+
+
+#######################################################
+[REACTION_PATTERNS."aberrant activation".sources]
+"{source}" = -1
+
+[REACTION_PATTERNS."aberrant activation".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."aberrant activation".targets]
+"{target}" = +1
+
+
+
+#######################################################
+[REACTION_PATTERNS."aberrant production".sources]
+"{source}" = -1
+
+[REACTION_PATTERNS."aberrant production".symbols]
+symbol = "-->" 
+
+[REACTION_PATTERNS."aberrant production".targets]
+"{target}" = +1
+
+
+
+#######################################################
+[REACTION_PATTERNS.feed]
+sources = {}
+symbol = "-->" 
+targets."{target}" = 1
+
+[REACTION_PATTERNS.sink]
+sources."{source}" = -1
+symbol = "-->" 
+targets = {}
+
+
+
+
